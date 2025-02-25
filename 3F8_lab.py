@@ -70,73 +70,80 @@ X_test = X[ n_train :, : ]
 y_train = y[ 0 : n_train ]
 y_test = y[ n_train : ]
 
-# The logistic function
 
-def logistic(x): return 1.0 / (1.0 + np.exp(-x))
 
-##
-# Function that makes predictions with a logistic classifier
-#
-# Input:
-#
-# X_tile: matrix of input features (with a constant 1 appended to the left) 
-#         for which to make predictions
-# w: vector of model parameters
-#
-# Output: The predictions of the logistic classifier
-#
+def logistic(x): 
+    """The logistic function"""
+    return 1.0 / (1.0 + np.exp(-x))
 
-def predict(X_tilde, w): return logistic(np.dot(X_tilde, w))
 
-##
-# Function that computes the average loglikelihood of the logistic classifier on some data.
-#
-# Input:
-#
-# X_tile: matrix of input features (with a constant 1 appended to the left) 
-#         for which to make predictions
-# y: vector of binary output labels 
-# w: vector of model parameters
-#
-# Output: The average loglikelihood
-#
+def predict(X_tilde, w): 
+    """Function that makes predictions with a logistic classifier
+
+    Input:
+
+        X_tile: matrix of input features (with a constant 1 appended to the left) 
+        for which to make predictions
+
+        w: vector of model parameters
+
+    Output: The predictions of the logistic classifier"""
+    return logistic(np.dot(X_tilde, w))
 
 def compute_average_ll(X_tilde, y, w):
+    """Function that computes the average loglikelihood of the logistic classifier on some data.
+
+    Input:
+
+    X_tile: matrix of input features (with a constant 1 appended to the left) 
+          for which to make predictions
+
+    y: vector of binary output labels 
+
+    w: vector of model parameters
+
+    Output: The average loglikelihood"""
     output_prob = predict(X_tilde, w)
     return np.mean(y * np.log(output_prob) + (1 - y) * np.log(1.0 - output_prob))
 
-##
-# Function that expands a matrix of input features by adding a column equal to 1.
-#
-# Input:
-#
-# X: matrix of input features.
-#
-# Output: Matrix x_tilde with one additional constant column equal to 1 added.
-#
 
-def get_x_tilde(X): return np.concatenate((np.ones((X.shape[ 0 ], 1 )), X), 1)
 
-##
-# Function that finds the model parameters by optimising the likelihood using gradient descent
-#
-# Input:
-#
-# X_tile_train: matrix of training input features (with a constant 1 appended to the left) 
-# y_train: vector of training binary output labels 
-# X_tile_test: matrix of test input features (with a constant 1 appended to the left) 
-# y_test: vector of test binary output labels 
-# alpha: step_size_parameter for the gradient based optimisation
-# n_steps: the number of steps of gradient based optimisation
-#
-# Output: 
-# 
-# 1 - Vector of model parameters w 
-# 2 - Vector with average log-likelihood values obtained on the training set
-# 3 - Vector with average log-likelihood values obtained on the test set
-#
+def get_x_tilde(X): 
+    """Function that expands a matrix of input features by adding a column equal to 1.
+
+    Input:
+
+    X: matrix of input features.
+
+    Output: Matrix x_tilde with one additional constant column equal to 1 added."""
+    return np.concatenate((np.ones((X.shape[ 0 ], 1 )), X), 1)
+
+
 
 def fit_w(X_tilde_train, y_train, X_tilde_test, y_test, n_steps, alpha):
+    """Function that finds the model parameters by optimising the likelihood using gradient descent
+
+Input:
+
+X_tile_train: matrix of training input features (with a constant 1 appended to the left) 
+
+y_train: vector of training binary output labels 
+
+X_tile_test: matrix of test input features (with a constant 1 appended to the left) 
+
+y_test: vector of test binary output labels 
+
+alpha: step_size_parameter for the gradient based optimisation
+
+n_steps: the number of steps of gradient based optimisation
+
+Output: 
+
+1 - Vector of model parameters w 
+
+2 - Vector with average log-likelihood values obtained on the training set
+
+3 - Vector with average log-likelihood values obtained on the test set"""
     w = np.random.randn(X_tilde_train.shape[ 1 ])
     ll_train = np.zeros(n_steps)
     ll_test = np.zeros(n_steps)
@@ -160,17 +167,16 @@ X_tilde_train = get_x_tilde(X_train)
 X_tilde_test = get_x_tilde(X_test)
 w, ll_train, ll_test = fit_w(X_tilde_train, y_train, X_tilde_test, y_test, n_steps, alpha)
 
-##
-# Function that plots the average log-likelihood returned by "fit_w"
-#
-# Input:
-#
-# ll: vector with log-likelihood values
-#
-# Output: Nothing
-#
+
 
 def plot_ll(ll):
+    """Function that plots the average log-likelihood returned by "fit_w"
+
+Input:
+
+ll: vector with log-likelihood values
+
+Output: Nothing"""
     plt.figure()
     ax = plt.gca()
     plt.xlim(0, len(ll) + 2)
@@ -186,20 +192,22 @@ def plot_ll(ll):
 plot_ll(ll_train)
 plot_ll(ll_test)
 
-##
-# Function that plots the predictive probabilities of the logistic classifier
-#
-# Input:
-#
-# X: 2d array with the input features for the data (without adding a constant column with ones at the beginning)
-# y: 1d array with the class labels (0 or 1) for the data
-# w: parameter vector
-# map_inputs: function that expands the original 2D inputs using basis functions.
-#
-# Output: Nothing.
-#
+
 
 def plot_predictive_distribution(X, y, w, map_inputs = lambda x : x):
+    """Function that plots the predictive probabilities of the logistic classifier
+
+Input:
+
+X: 2d array with the input features for the data (without adding a constant column with ones at the beginning)
+
+y: 1d array with the class labels (0 or 1) for the data
+
+w: parameter vector
+
+map_inputs: function that expands the original 2D inputs using basis functions.
+
+Output: Nothing."""
     xx, yy = plot_data_internal(X, y)
     ax = plt.gca()
     X_tilde = get_x_tilde(map_inputs(np.concatenate((xx.ravel().reshape((-1, 1)), yy.ravel().reshape((-1, 1))), 1)))
