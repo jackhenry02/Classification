@@ -30,9 +30,17 @@ beta_init = np.zeros(n_features)
 eta_values = np.logspace(-4, 0, 20)  # 20 values from 10^(-4) to 10^0 (1)
 iterations = []
 
+# Track the minimum iterations and corresponding eta
+min_iters = float('inf')
+best_eta = None
+
 for eta in eta_values:
     iters = gradient_ascent(X, y, beta_init, eta)
     iterations.append(iters)
+    
+    if iters < min_iters:
+        min_iters = iters
+        best_eta = eta
 
 # Plot results
 plt.figure(figsize=(8, 5))
@@ -44,4 +52,5 @@ plt.title("Effect of Learning Rate on Convergence Speed")
 plt.grid(True)
 plt.show()
 
-print(min())
+# Print the best eta and corresponding iterations
+print(f"The best eta is {best_eta} with {min_iters} iterations.")
