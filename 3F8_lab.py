@@ -18,18 +18,17 @@ y = y[ permutation ]
 
 import matplotlib.pyplot as plt
 
-##
-# Function that plots the points in 2D together with their labels
-#
-# Inputs:
-#
-# X: 2d array with the input features
-# y: 1d array with the class labels (0 or 1)
-#
-# Output: 2D matrices with the x and y coordinates of the points shown in the plot
-#
 
 def plot_data_internal(X, y):
+    """Function that plots the points in 2D together with their labels
+
+Inputs:
+
+X: 2d array with the input features
+
+y: 1d array with the class labels (0 or 1)
+
+Output: 2D matrices with the x and y coordinates of the points shown in the plot"""
     x_min, x_max = X[ :, 0 ].min() - .5, X[ :, 0 ].max() + .5
     y_min, y_max = X[ :, 1 ].min() - .5, X[ :, 1 ].max() + .5
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
@@ -45,18 +44,17 @@ def plot_data_internal(X, y):
     plt.legend(loc = 'upper left', scatterpoints = 1, numpoints = 1)
     return xx, yy
 
-##
-# Function that plots the data without returning anything by calling "plot_data_internal".
-#
-# Input:
-#
-# X: 2d array with the input features
-# y: 1d array with the class labels (0 or 1)
-#
-# Output: Nothing.
-#
 
 def plot_data(X, y):
+    """Function that plots the data without returning anything by calling "plot_data_internal".
+
+Input:
+
+X: 2d array with the input features
+
+y: 1d array with the class labels (0 or 1)
+
+Output: Nothing."""
     xx, yy = plot_data_internal(X, y)
     plt.show()
 
