@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store  # macOS specific
+.idea/      # JetBrains IDEs like PyCharm
+*.log       # Log files
