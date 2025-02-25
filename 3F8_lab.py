@@ -191,6 +191,7 @@ def find_best_alpha(X_tilde_train, y_train, X_tilde_test, y_test, n_steps, alpha
     min_steps = float('inf')  # Initialize with a large value
     ll_train_best = None
     ll_test_best = None
+    steps_per_alpha = []
 
     # Loop through different learning rates
     for alpha in alpha_values:
@@ -226,35 +227,53 @@ def find_best_alpha(X_tilde_train, y_train, X_tilde_test, y_test, n_steps, alpha
             best_w = w
             ll_train_best = ll_train[:i+1]
             ll_test_best = ll_test[:i+1]
-    
+        
+        # Store the number of steps for each alpha value
+        steps_per_alpha.append(i + 1 if converged else n_steps)
+
     # Print the best alpha and the number of steps it took to converge
     print(f"Best alpha: {best_alpha} with {min_steps} steps to converge.")
+    
+    # Plotting the results
+    plt.figure(figsize=(8, 6))
+    plt.plot(alpha_values, steps_per_alpha, marker='o', linestyle='-', color='b')
+    plt.xscale('log')  # Log scale for x-axis (learning rate)
+    plt.xlabel('Learning Rate (alpha)')
+    plt.ylabel('Steps to Convergence')
+    plt.title('Learning Rate vs. Steps to Convergence')
+    plt.grid(True)
+    plt.show()
 
-    return best_alpha, best_w, ll_train_best, ll_test_best
+    return best_alpha, best_w, ll_train_best, ll_test_best, min_steps
 
-# Define possible alpha values
-alpha_values = [1e-4, 1e-3, 1e-2, 1e-1, 1.0] #C hange manually and use trial and error to find good values
 
+# Define training and test data
 X_tilde_train = get_x_tilde(X_train)
 X_tilde_test = get_x_tilde(X_test)
 
-# Call the function to find the best alpha
-best_alpha, best_w, ll_train_best, ll_test_best = find_best_alpha(X_tilde_train, y_train, X_tilde_test, y_test, 100, alpha_values)
+# Define possible alpha values
+# try 1 - alpha_values = [1e-4, 1e-3, 1e-2, 1e-1, 1.0]
+# try 2 - alpha_values = np.logspace(-4, -2, 5) # 5 values from 10^(-4) to 10^(-2)
+alpha_values = np.logspace(-4, -2, 20) # 20 values from 10^(-4) to 10^(-2)
+
+# Call the function to find the best alpha and plot the results
+best_alpha, best_w, ll_train_best, ll_test_best, min_steps = find_best_alpha(X_tilde_train, y_train, X_tilde_test, y_test, 100, alpha_values)
 
 # Best learning rate and model parameters
 print(f"Best learning rate: {best_alpha}")
 print("Optimal weights:", best_w)
+print(f"Steps to converge for best alpha: {min_steps}")
 
 
 # We train the classifier
-'''
-alpha = # XXX Learning rate for gradient-based optimisation. To be completed by the student
-n_steps = # XXX Number of steps of gradient-based optimisation. To be completed by the student
+factor = 3
+
+alpha = best_alpha/factor # Learning rate for gradient-based optimisation. To be completed by the student
+n_steps = 2*factor*min_steps # Number of steps of gradient-based optimisation. To be completed by the student
 
 X_tilde_train = get_x_tilde(X_train)
 X_tilde_test = get_x_tilde(X_test)
 w, ll_train, ll_test = fit_w(X_tilde_train, y_train, X_tilde_test, y_test, n_steps, alpha)
-
 
 
 def plot_ll(ll):
@@ -279,8 +298,6 @@ Output: Nothing"""
 
 plot_ll(ll_train)
 plot_ll(ll_test)
-
-
 
 def plot_predictive_distribution(X, y, w, map_inputs = lambda x : x):
     """Function that plots the predictive probabilities of the logistic classifier
@@ -309,20 +326,18 @@ Output: Nothing."""
 
 plot_predictive_distribution(X, y, w)
 
-##
-# Function that replaces initial input features by evaluating Gaussian basis functions
-# on a grid of points
-#
-# Inputs:
-#
-# l: hyper-parameter for the width of the Gaussian basis functions
-# Z: location of the Gaussian basis functions
-# X: points at which to evaluate the basis functions
-#
-# Output: Feature matrix with the evaluations of the Gaussian basis functions.
-#
-
+'''
 def evaluate_basis_functions(l, X, Z):
+    """Function that replaces initial input features by evaluating Gaussian basis functions
+on a grid of points
+
+Inputs:
+
+l: hyper-parameter for the width of the Gaussian basis functions
+Z: location of the Gaussian basis functions
+X: points at which to evaluate the basis functions
+
+Output: Feature matrix with the evaluations of the Gaussian basis functions."""
     X2 = np.sum(X**2, 1)
     Z2 = np.sum(Z**2, 1)
     ones_Z = np.ones(Z.shape[ 0 ])
