@@ -142,22 +142,112 @@ Output:
 2 - Vector with average log-likelihood values obtained on the training set
 
 3 - Vector with average log-likelihood values obtained on the test set"""
-    w = np.random.randn(X_tilde_train.shape[ 1 ])
-    ll_train = np.zeros(n_steps)
-    ll_test = np.zeros(n_steps)
+    w = np.random.randn(X_tilde_train.shape[ 1 ]) # Initialize weights with random values
+    ll_train = np.zeros(n_steps) # Vector to store log-likelihood values for the training set
+    ll_test = np.zeros(n_steps) # Vector to store log-likelihood values for the test set
     for i in range(n_steps):
-        sigmoid_value = predict(X_tilde_train, w)
+        # Predict the probabilities using the sigmoid function
+        sigmoid_value = predict(X_tilde_train, w) # Use your sigmoid function to get predictions
 
-        w = # XXX Gradient-based update rule for w. To be completed by the student
+        # Compute the gradient of the log-likelihood
+        gradient = X_tilde_train.T @ (y_train - sigmoid_value)  # Vectorized gradient
 
-        ll_train[ i ] = compute_average_ll(X_tilde_train, y_train, w)
-        ll_test[ i ] = compute_average_ll(X_tilde_test, y_test, w)
+        # Update the weights using gradient ascent
+        w = w + alpha * gradient  # Gradient-based update rule for w
+
+        # Compute the log-likelihood for the training and test sets
+        ll_train[ i ] = compute_average_ll(X_tilde_train, y_train, w) # Function to compute log-likelihood on the training set
+        ll_test[ i ] = compute_average_ll(X_tilde_test, y_test, w) # Function to compute log-likelihood on the test set
         print(ll_train[ i ], ll_test[ i ])
+        # Print the log-likelihoods for training and testing sets at this step
+        print(f"Step {i + 1}: Training LL = {ll_train[i]}, Test LL = {ll_test[i]}")
 
-    return w, ll_train, ll_test
+    return w, ll_train, ll_test # Return the model parameters and log-likelihoods
+
+
+
+def find_best_alpha(X_tilde_train, y_train, X_tilde_test, y_test, n_steps, alpha_values, tolerance=1e-4):
+    """
+    Function to find the optimal learning rate (alpha) by testing different values
+    and tracking the number of iterations it takes to converge.
+
+    Input:
+    X_tilde_train: matrix of training input features (with a constant 1 appended to the left)
+    y_train: vector of training binary output labels
+    X_tilde_test: matrix of test input features (with a constant 1 appended to the left)
+    y_test: vector of test binary output labels
+    alpha_values: List of learning rates to test
+    n_steps: maximum number of gradient descent steps
+    tolerance: the convergence tolerance (default is 1e-4)
+
+    Output:
+    best_alpha: the learning rate that converged in the least number of steps
+    best_w: the optimal model parameters for the best learning rate
+    ll_train_best: vector of log-likelihood values for the training set
+    ll_test_best: vector of log-likelihood values for the test set
+    """
+    best_alpha = None
+    best_w = None
+    min_steps = float('inf')  # Initialize with a large value
+    ll_train_best = None
+    ll_test_best = None
+
+    # Loop through different learning rates
+    for alpha in alpha_values:
+        w = np.random.randn(X_tilde_train.shape[1])  # Initialize weights with random values
+        ll_train = np.zeros(n_steps)  # Log-likelihood for the training set
+        ll_test = np.zeros(n_steps)   # Log-likelihood for the test set
+        converged = False
+
+        for i in range(n_steps):
+            # Predict the probabilities using the sigmoid function
+            sigmoid_value = predict(X_tilde_train, w)
+
+            # Compute the gradient of the log-likelihood
+            gradient = X_tilde_train.T @ (y_train - sigmoid_value)
+
+            # Update the weights using gradient ascent
+            w = w + alpha * gradient
+
+            # Compute the log-likelihood for the training and test sets
+            ll_train[i] = compute_average_ll(X_tilde_train, y_train, w)
+            ll_test[i] = compute_average_ll(X_tilde_test, y_test, w)
+
+            # Check for convergence: if the change in log-likelihood is smaller than tolerance, stop
+            if i > 0 and abs(ll_train[i] - ll_train[i - 1]) < tolerance:
+                converged = True
+                print(f"Converged at step {i + 1} with alpha={alpha}")
+                break
+        
+        # If converged, check if this learning rate gives fewer steps to converge
+        if converged and i < min_steps:
+            min_steps = i
+            best_alpha = alpha
+            best_w = w
+            ll_train_best = ll_train[:i+1]
+            ll_test_best = ll_test[:i+1]
+    
+    # Print the best alpha and the number of steps it took to converge
+    print(f"Best alpha: {best_alpha} with {min_steps} steps to converge.")
+
+    return best_alpha, best_w, ll_train_best, ll_test_best
+
+# Define possible alpha values
+alpha_values = [1e-4, 1e-3, 1e-2, 1e-1, 1.0] #C hange manually and use trial and error to find good values
+
+X_tilde_train = get_x_tilde(X_train)
+X_tilde_test = get_x_tilde(X_test)
+
+# Call the function to find the best alpha
+best_alpha, best_w, ll_train_best, ll_test_best = find_best_alpha(X_tilde_train, y_train, X_tilde_test, y_test, 100, alpha_values)
+
+# Best learning rate and model parameters
+print(f"Best learning rate: {best_alpha}")
+print("Optimal weights:", best_w)
+
 
 # We train the classifier
-
+'''
 alpha = # XXX Learning rate for gradient-based optimisation. To be completed by the student
 n_steps = # XXX Number of steps of gradient-based optimisation. To be completed by the student
 
@@ -218,7 +308,7 @@ Output: Nothing."""
 # We plot the predictive distribution
 
 plot_predictive_distribution(X, y, w)
-'''
+
 ##
 # Function that replaces initial input features by evaluating Gaussian basis functions
 # on a grid of points
