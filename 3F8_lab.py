@@ -266,10 +266,10 @@ print(f"Steps to converge for best alpha: {min_steps}")
 
 
 # We train the classifier
-factor = 3
+factor = 1000
 
-alpha = best_alpha/factor # Learning rate for gradient-based optimisation. To be completed by the student
-n_steps = 2*factor*min_steps # Number of steps of gradient-based optimisation. To be completed by the student
+alpha = best_alpha/(factor*0.1) # Learning rate for gradient-based optimisation. To be completed by the student
+n_steps = factor*min_steps # Number of steps of gradient-based optimisation. To be completed by the student
 
 X_tilde_train = get_x_tilde(X_train)
 X_tilde_test = get_x_tilde(X_test)
@@ -326,7 +326,6 @@ Output: Nothing."""
 
 plot_predictive_distribution(X, y, w)
 
-'''
 def evaluate_basis_functions(l, X, Z):
     """Function that replaces initial input features by evaluating Gaussian basis functions
 on a grid of points
@@ -345,6 +344,93 @@ Output: Feature matrix with the evaluations of the Gaussian basis functions."""
     r2 = np.outer(X2, ones_Z) - 2 * np.dot(X, Z.T) + np.outer(ones_X, Z2)
     return np.exp(-0.5 / l**2 * r2)
 
+
+# Compute final log-likelihood per datapoint
+final_ll_train = compute_average_ll(X_tilde_train, y_train, w)
+final_ll_test = compute_average_ll(X_tilde_test, y_test, w)
+
+print(f"Final training log-likelihood per datapoint: {final_ll_train:.4f}")
+print(f"Final test log-likelihood per datapoint: {final_ll_test:.4f}")
+
+# Predict probabilities
+y_test_pred_prob = predict(X_tilde_test, w)
+
+# Apply threshold at τ = 0.5 to get binary class predictions
+y_test_pred = (y_test_pred_prob > 0.5).astype(int)
+
+# Compute confusion matrix
+true_negatives = np.sum((y_test == 0) & (y_test_pred == 0))
+false_positives = np.sum((y_test == 0) & (y_test_pred == 1))
+false_negatives = np.sum((y_test == 1) & (y_test_pred == 0))
+true_positives = np.sum((y_test == 1) & (y_test_pred == 1))
+
+# Compute fractions
+total_negatives = np.sum(y_test == 0)
+total_positives = np.sum(y_test == 1)
+
+P_yhat0_y0 = true_negatives / total_negatives  # P(ŷ = 0 | y = 0)
+P_yhat1_y0 = false_positives / total_negatives  # P(ŷ = 1 | y = 0)
+P_yhat0_y1 = false_negatives / total_positives  # P(ŷ = 0 | y = 1)
+P_yhat1_y1 = true_positives / total_positives  # P(ŷ = 1 | y = 1)
+
+# Print confusion matrix
+print("\nConfusion Matrix:")
+print(f"          Predicted 0    Predicted 1")
+print(f"True 0    {P_yhat0_y0:.4f}        {P_yhat1_y0:.4f}")
+print(f"True 1    {P_yhat0_y1:.4f}        {P_yhat1_y1:.4f}")
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def plot_confusion_matrix(y_true, y_pred):
+    """Function to compute and plot the confusion matrix as an image.
+
+    Inputs:
+    y_true: True labels
+    y_pred: Predicted labels
+
+    Output:
+    Displays a confusion matrix as an image.
+    """
+    # Compute confusion matrix values
+    tn = np.sum((y_true == 0) & (y_pred == 0))
+    fp = np.sum((y_true == 0) & (y_pred == 1))
+    fn = np.sum((y_true == 1) & (y_pred == 0))
+    tp = np.sum((y_true == 1) & (y_pred == 1))
+
+    # Compute fractions
+    total_neg = np.sum(y_true == 0)
+    total_pos = np.sum(y_true == 1)
+
+    tn_frac = tn / total_neg if total_neg > 0 else 0
+    fp_frac = fp / total_neg if total_neg > 0 else 0
+    fn_frac = fn / total_pos if total_pos > 0 else 0
+    tp_frac = tp / total_pos if total_pos > 0 else 0
+
+    # Define the table data
+    table_data = [
+        ["", "True 0", "True 1"],
+        ["Pred 0", f"{tn_frac:.2f}", f"{fn_frac:.2f}"],
+        ["Pred 1", f"{fp_frac:.2f}", f"{tp_frac:.2f}"]
+    ]
+
+    # Plot the table
+    fig, ax = plt.subplots(figsize=(4, 3))
+    ax.axis("tight")
+    ax.axis("off")
+    table = ax.table(cellText=table_data, cellLoc="center", loc="center")
+
+    # Show the table
+    plt.show()
+
+# Generate predictions based on threshold τ = 0.5
+y_pred_test = (predict(get_x_tilde(X_test), w) > 0.5).astype(int)
+
+# Call the function with true and predicted labels
+plot_confusion_matrix(y_test, y_pred_test)
+
+'''
 # We expand the data
 
 l = # XXX Width of the Gaussian basis funcction. To be completed by the student
