@@ -334,46 +334,48 @@ final_ll_test = compute_average_ll(X_tilde_test, y_test, w)
 print(f"Final training log-likelihood per datapoint: {final_ll_train:.4f}")
 print(f"Final test log-likelihood per datapoint: {final_ll_test:.4f}")
 
+# Predict probabilities
+y_test_pred_prob = predict(X_tilde_test, w)
+
+# Apply threshold at τ = 0.5 to get binary class predictions
+y_test_pred = (y_test_pred_prob > 0.5).astype(int)
+
+# Compute confusion matrix
+true_negatives = np.sum((y_test == 0) & (y_test_pred == 0))
+false_positives = np.sum((y_test == 0) & (y_test_pred == 1))
+false_negatives = np.sum((y_test == 1) & (y_test_pred == 0))
+true_positives = np.sum((y_test == 1) & (y_test_pred == 1))
+
+# more efficient code below
+# false_positives = np.sum((y_test == 0) & (y_test_pred))
+# false_negatives = np.sum((y_test == 1) & (np.logical_not(y_test_pred))
+
+# Compute fractions
+total_negatives = np.sum(y_test == 0)
+total_positives = np.sum(y_test == 1)
+
+P_yhat0_y0 = true_negatives / total_negatives  # P(ŷ = 0 | y = 0)
+P_yhat1_y0 = false_positives / total_negatives  # P(ŷ = 1 | y = 0)
+P_yhat0_y1 = false_negatives / total_positives  # P(ŷ = 0 | y = 1)
+P_yhat1_y1 = true_positives / total_positives  # P(ŷ = 1 | y = 1)
+
+'''# Print confusion matrix
+print("\nConfusion Matrix:")
+print(f"          Predicted 0    Predicted 1")
+print(f"True 0    {P_yhat0_y0:.4f}        {P_yhat1_y0:.4f}")
+print(f"True 1    {P_yhat0_y1:.4f}        {P_yhat1_y1:.4f}")'''
+
+
 def plot_confusion_matrix(y_true, y_pred):
     """Function to compute and plot the confusion matrix in the required format.
-     Inputs:
+
+    Inputs:
     y_true: True labels
     y_pred: Predicted labels
 
     Output:
     Displays a confusion matrix as an image.
     """
-    # Predict probabilities
-    y_test_pred_prob = predict(X_tilde_test, w)
-
-    # Apply threshold at τ = 0.5 to get binary class predictions
-    y_test_pred = (y_test_pred_prob > 0.5).astype(int)
-
-    # Compute confusion matrix
-    true_negatives = np.sum((y_test == 0) & (y_test_pred == 0))
-    false_positives = np.sum((y_test == 0) & (y_test_pred == 1))
-    false_negatives = np.sum((y_test == 1) & (y_test_pred == 0))
-    true_positives = np.sum((y_test == 1) & (y_test_pred == 1))
-
-    # more efficient code below
-    # false_positives = np.sum((y_test == 0) & (y_test_pred))
-    # false_negatives = np.sum((y_test == 1) & (np.logical_not(y_test_pred))
-
-    '''# Compute fractions
-    total_negatives = np.sum(y_test == 0)
-    total_positives = np.sum(y_test == 1)
-
-    P_yhat0_y0 = true_negatives / total_negatives  # P(ŷ = 0 | y = 0)
-    P_yhat1_y0 = false_positives / total_negatives  # P(ŷ = 1 | y = 0)
-    P_yhat0_y1 = false_negatives / total_positives  # P(ŷ = 0 | y = 1)
-    P_yhat1_y1 = true_positives / total_positives  # P(ŷ = 1 | y = 1)
-
-    # Print confusion matrix
-    print("\nConfusion Matrix:")
-    print(f"          Predicted 0    Predicted 1")
-    print(f"True 0    {P_yhat0_y0:.4f}        {P_yhat1_y0:.4f}")
-    print(f"True 1    {P_yhat0_y1:.4f}        {P_yhat1_y1:.4f}")'''
-   
     # Compute confusion matrix values
     tn = np.sum((y_pred == 0) & (y_true == 0))
     fp = np.sum((y_pred == 1) & (y_true == 0))
