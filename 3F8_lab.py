@@ -158,9 +158,9 @@ Output:
         # Compute the log-likelihood for the training and test sets
         ll_train[ i ] = compute_average_ll(X_tilde_train, y_train, w) # Function to compute log-likelihood on the training set
         ll_test[ i ] = compute_average_ll(X_tilde_test, y_test, w) # Function to compute log-likelihood on the test set
-        print(ll_train[ i ], ll_test[ i ])
+        #print(ll_train[ i ], ll_test[ i ])
         # Print the log-likelihoods for training and testing sets at this step
-        print(f"Step {i + 1}: Training LL = {ll_train[i]}, Test LL = {ll_test[i]}")
+        #print(f"Step {i + 1}: Training LL = {ll_train[i]}, Test LL = {ll_test[i]}")
 
     return w, ll_train, ll_test # Return the model parameters and log-likelihoods
 
@@ -334,44 +334,46 @@ final_ll_test = compute_average_ll(X_tilde_test, y_test, w)
 print(f"Final training log-likelihood per datapoint: {final_ll_train:.4f}")
 print(f"Final test log-likelihood per datapoint: {final_ll_test:.4f}")
 
-# Predict probabilities
-y_test_pred_prob = predict(X_tilde_test, w)
-
-# Apply threshold at τ = 0.5 to get binary class predictions
-y_test_pred = (y_test_pred_prob > 0.5).astype(int)
-
-# Compute confusion matrix
-true_negatives = np.sum((y_test == 0) & (y_test_pred == 0))
-false_positives = np.sum((y_test == 0) & (y_test_pred == 1))
-false_negatives = np.sum((y_test == 1) & (y_test_pred == 0))
-true_positives = np.sum((y_test == 1) & (y_test_pred == 1))
-
-# Compute fractions
-total_negatives = np.sum(y_test == 0)
-total_positives = np.sum(y_test == 1)
-
-P_yhat0_y0 = true_negatives / total_negatives  # P(ŷ = 0 | y = 0)
-P_yhat1_y0 = false_positives / total_negatives  # P(ŷ = 1 | y = 0)
-P_yhat0_y1 = false_negatives / total_positives  # P(ŷ = 0 | y = 1)
-P_yhat1_y1 = true_positives / total_positives  # P(ŷ = 1 | y = 1)
-
-'''# Print confusion matrix
-print("\nConfusion Matrix:")
-print(f"          Predicted 0    Predicted 1")
-print(f"True 0    {P_yhat0_y0:.4f}        {P_yhat1_y0:.4f}")
-print(f"True 1    {P_yhat0_y1:.4f}        {P_yhat1_y1:.4f}")'''
-
-
 def plot_confusion_matrix(y_true, y_pred):
     """Function to compute and plot the confusion matrix in the required format.
-
-    Inputs:
+     Inputs:
     y_true: True labels
     y_pred: Predicted labels
 
     Output:
     Displays a confusion matrix as an image.
     """
+    # Predict probabilities
+    y_test_pred_prob = predict(X_tilde_test, w)
+
+    # Apply threshold at τ = 0.5 to get binary class predictions
+    y_test_pred = (y_test_pred_prob > 0.5).astype(int)
+
+    # Compute confusion matrix
+    true_negatives = np.sum((y_test == 0) & (y_test_pred == 0))
+    false_positives = np.sum((y_test == 0) & (y_test_pred == 1))
+    false_negatives = np.sum((y_test == 1) & (y_test_pred == 0))
+    true_positives = np.sum((y_test == 1) & (y_test_pred == 1))
+
+    # more efficient code below
+    # false_positives = np.sum((y_test == 0) & (y_test_pred))
+    # false_negatives = np.sum((y_test == 1) & (np.logical_not(y_test_pred))
+
+    '''# Compute fractions
+    total_negatives = np.sum(y_test == 0)
+    total_positives = np.sum(y_test == 1)
+
+    P_yhat0_y0 = true_negatives / total_negatives  # P(ŷ = 0 | y = 0)
+    P_yhat1_y0 = false_positives / total_negatives  # P(ŷ = 1 | y = 0)
+    P_yhat0_y1 = false_negatives / total_positives  # P(ŷ = 0 | y = 1)
+    P_yhat1_y1 = true_positives / total_positives  # P(ŷ = 1 | y = 1)
+
+    # Print confusion matrix
+    print("\nConfusion Matrix:")
+    print(f"          Predicted 0    Predicted 1")
+    print(f"True 0    {P_yhat0_y0:.4f}        {P_yhat1_y0:.4f}")
+    print(f"True 1    {P_yhat0_y1:.4f}        {P_yhat1_y1:.4f}")'''
+   
     # Compute confusion matrix values
     tn = np.sum((y_pred == 0) & (y_true == 0))
     fp = np.sum((y_pred == 1) & (y_true == 0))
@@ -432,15 +434,15 @@ Output: Feature matrix with the evaluations of the Gaussian basis functions."""
 
 # We expand the data
 
-l = # XXX Width of the Gaussian basis funcction. To be completed by the student
+l = 0.1 #XXX Width of the Gaussian basis funcction. To be completed by the student
 
 X_tilde_train = get_x_tilde(evaluate_basis_functions(l, X_train, X_train))
 X_tilde_test = get_x_tilde(evaluate_basis_functions(l, X_test, X_train))
 
 # We train the new classifier on the feature expanded inputs
 
-alpha = # XXX Learning rate for gradient-based optimisation with basis functions. To be completed by the student
-n_steps = # XXX Number of steps of gradient-based optimisation with basis functions. To be completed by the student
+alpha = 0.004# XXX Learning rate for gradient-based optimisation with basis functions. To be completed by the student
+n_steps = 10000# XXX Number of steps of gradient-based optimisation with basis functions. To be completed by the student
 
 w, ll_train, ll_test = fit_w(X_tilde_train, y_train, X_tilde_test, y_test, n_steps, alpha)
 
@@ -452,3 +454,4 @@ plot_ll(ll_test)
 # We plot the predictive distribution
 
 plot_predictive_distribution(X, y, w, lambda x : evaluate_basis_functions(l, x, X_train))
+
