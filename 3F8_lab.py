@@ -326,24 +326,6 @@ Output: Nothing."""
 
 plot_predictive_distribution(X, y, w)
 
-def evaluate_basis_functions(l, X, Z):
-    """Function that replaces initial input features by evaluating Gaussian basis functions
-on a grid of points
-
-Inputs:
-
-l: hyper-parameter for the width of the Gaussian basis functions
-Z: location of the Gaussian basis functions
-X: points at which to evaluate the basis functions
-
-Output: Feature matrix with the evaluations of the Gaussian basis functions."""
-    X2 = np.sum(X**2, 1)
-    Z2 = np.sum(Z**2, 1)
-    ones_Z = np.ones(Z.shape[ 0 ])
-    ones_X = np.ones(X.shape[ 0 ])
-    r2 = np.outer(X2, ones_Z) - 2 * np.dot(X, Z.T) + np.outer(ones_X, Z2)
-    return np.exp(-0.5 / l**2 * r2)
-
 
 # Compute final log-likelihood per datapoint
 final_ll_train = compute_average_ll(X_tilde_train, y_train, w)
@@ -373,18 +355,15 @@ P_yhat1_y0 = false_positives / total_negatives  # P(ŷ = 1 | y = 0)
 P_yhat0_y1 = false_negatives / total_positives  # P(ŷ = 0 | y = 1)
 P_yhat1_y1 = true_positives / total_positives  # P(ŷ = 1 | y = 1)
 
-# Print confusion matrix
+'''# Print confusion matrix
 print("\nConfusion Matrix:")
 print(f"          Predicted 0    Predicted 1")
 print(f"True 0    {P_yhat0_y0:.4f}        {P_yhat1_y0:.4f}")
-print(f"True 1    {P_yhat0_y1:.4f}        {P_yhat1_y1:.4f}")
+print(f"True 1    {P_yhat0_y1:.4f}        {P_yhat1_y1:.4f}")'''
 
-
-import numpy as np
-import matplotlib.pyplot as plt
 
 def plot_confusion_matrix(y_true, y_pred):
-    """Function to compute and plot the confusion matrix as an image.
+    """Function to compute and plot the confusion matrix in the required format.
 
     Inputs:
     y_true: True labels
@@ -394,10 +373,10 @@ def plot_confusion_matrix(y_true, y_pred):
     Displays a confusion matrix as an image.
     """
     # Compute confusion matrix values
-    tn = np.sum((y_true == 0) & (y_pred == 0))
-    fp = np.sum((y_true == 0) & (y_pred == 1))
-    fn = np.sum((y_true == 1) & (y_pred == 0))
-    tp = np.sum((y_true == 1) & (y_pred == 1))
+    tn = np.sum((y_pred == 0) & (y_true == 0))
+    fp = np.sum((y_pred == 1) & (y_true == 0))
+    fn = np.sum((y_pred == 0) & (y_true == 1))
+    tp = np.sum((y_pred == 1) & (y_true == 1))
 
     # Compute fractions
     total_neg = np.sum(y_true == 0)
@@ -408,15 +387,16 @@ def plot_confusion_matrix(y_true, y_pred):
     fn_frac = fn / total_pos if total_pos > 0 else 0
     tp_frac = tp / total_pos if total_pos > 0 else 0
 
-    # Define the table data
+    # Define the table data in the exact format required
     table_data = [
-        ["", "True 0", "True 1"],
-        ["Pred 0", f"{tn_frac:.2f}", f"{fn_frac:.2f}"],
-        ["Pred 1", f"{fp_frac:.2f}", f"{tp_frac:.2f}"]
+        [" ", "predicted label, y*", " "],
+        ["true label, y", "0", "1"],
+        ["0", f"{tn_frac:.2f}", f"{fp_frac:.2f}"],
+        [ "1", f"{fn_frac:.2f}", f"{tp_frac:.2f}"]
     ]
 
     # Plot the table
-    fig, ax = plt.subplots(figsize=(4, 3))
+    fig, ax = plt.subplots(figsize=(5, 3))
     ax.axis("tight")
     ax.axis("off")
     table = ax.table(cellText=table_data, cellLoc="center", loc="center")
@@ -430,7 +410,26 @@ y_pred_test = (predict(get_x_tilde(X_test), w) > 0.5).astype(int)
 # Call the function with true and predicted labels
 plot_confusion_matrix(y_test, y_pred_test)
 
-'''
+
+
+def evaluate_basis_functions(l, X, Z):
+    """Function that replaces initial input features by evaluating Gaussian basis functions
+on a grid of points
+
+Inputs:
+
+l: hyper-parameter for the width of the Gaussian basis functions
+Z: location of the Gaussian basis functions
+X: points at which to evaluate the basis functions
+
+Output: Feature matrix with the evaluations of the Gaussian basis functions."""
+    X2 = np.sum(X**2, 1)
+    Z2 = np.sum(Z**2, 1)
+    ones_Z = np.ones(Z.shape[ 0 ])
+    ones_X = np.ones(X.shape[ 0 ])
+    r2 = np.outer(X2, ones_Z) - 2 * np.dot(X, Z.T) + np.outer(ones_X, Z2)
+    return np.exp(-0.5 / l**2 * r2)
+
 # We expand the data
 
 l = # XXX Width of the Gaussian basis funcction. To be completed by the student
@@ -453,4 +452,3 @@ plot_ll(ll_test)
 # We plot the predictive distribution
 
 plot_predictive_distribution(X, y, w, lambda x : evaluate_basis_functions(l, x, X_train))
-'''
