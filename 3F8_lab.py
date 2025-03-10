@@ -5,6 +5,8 @@
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 X = np.loadtxt('X.txt')
 y = np.loadtxt('y.txt')
 
@@ -15,8 +17,6 @@ X = X[ permutation, : ]
 y = y[ permutation ]
 
 # We plot the data
-
-import matplotlib.pyplot as plt
 
 
 def plot_data_internal(X, y):
@@ -444,7 +444,7 @@ X_tilde_test = get_x_tilde(evaluate_basis_functions(l, X_test, X_train))
 # We train the new classifier on the feature expanded inputs
 
 alpha = 0.004# XXX Learning rate for gradient-based optimisation with basis functions. To be completed by the student
-n_steps = 10000# XXX Number of steps of gradient-based optimisation with basis functions. To be completed by the student
+n_steps = 1000# XXX Number of steps of gradient-based optimisation with basis functions. To be completed by the student
 
 w, ll_train, ll_test = fit_w(X_tilde_train, y_train, X_tilde_test, y_test, n_steps, alpha)
 
